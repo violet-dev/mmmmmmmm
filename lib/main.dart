@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:memorynusu/viewer.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,10 +11,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
+      // theme: ThemeData(
+      //   primarySwatch: Colors.blue,
+      //   visualDensity: VisualDensity.adaptivePlatformDensity,
+      // ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -28,27 +29,92 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  Timer _clearTimer;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _clearTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      imageCache.clearLiveImages();
+      imageCache.clear();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return VerticalImageViewer(
-      ViewerPageProvider(
-        id: 0,
-        uris: imgs,
-        headers: {'Referer': 'https://hitomi.la/reader/1426111.html/'},
-      ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: Icon(Icons.add),
+    final height = MediaQuery.of(context).size.height;
+    // return Scaffold(
+    //   body: Image.network(
+    //     imgs[0],
+    //     headers: {'Referer': 'https://hitomi.la/reader/1426111.html/'},
+    //   ),
+    // );
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: Text('asdf'),
       // ),
+      body: ListView.builder(
+        itemCount: imgs.length,
+        // cacheExtent: height * 2,
+        itemBuilder: (context, index) {
+          // Network Image
+          return Image.network(
+            imgs[index],
+            headers: {'Referer': 'https://hitomi.la/reader/1426111.html/'},
+            fit: BoxFit.cover,
+            // height: 100,
+            loadingBuilder: (context, widget, progress) {
+              if (progress == null) {
+                return widget;
+              }
+
+              return SizedBox(
+                height: 300,
+                child: Center(
+                  child: SizedBox(
+                    child: CircularProgressIndicator(
+                      value: progress != null
+                          ? progress.cumulativeBytesLoaded /
+                              progress.expectedTotalBytes
+                          : 0,
+                    ),
+                    width: 30,
+                    height: 30,
+                  ),
+                ),
+              );
+            },
+            // errorBuilder: (context, url, error) => new Icon(
+            //   Icons.error,
+            //   color: Colors.black,
+            // ),
+          );
+
+          // CachedNetworkImage
+          // return CachedNetworkImage(
+          //   imageUrl: imgs[index],
+          //   httpHeaders: {'Referer': 'https://hitomi.la/reader/1426111.html/'},
+          //   fit: BoxFit.cover,
+          //   fadeInDuration: Duration(microseconds: 500),
+          //   fadeInCurve: Curves.easeIn,
+          //   // memCacheWidth: width.toInt(),
+          //   progressIndicatorBuilder: (context, string, progress) {
+          //     return SizedBox(
+          //       height: 300,
+          //       child: Center(
+          //         child: SizedBox(
+          //           child: CircularProgressIndicator(value: progress.progress),
+          //           width: 30,
+          //           height: 30,
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // );
+        },
+      ),
     );
   }
 }
