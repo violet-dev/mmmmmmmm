@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+# * Warning!!! *
+The images included this project contain sensational content!
+
+Watch your back!
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
